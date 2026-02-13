@@ -179,6 +179,97 @@
             }
         }
 
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1.5s both;
+            cursor: pointer;
+        }
+
+        .scroll-indicator span {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 500;
+        }
+
+        .scroll-arrow {
+            width: 24px;
+            height: 24px;
+            border-right: 2px solid var(--accent);
+            border-bottom: 2px solid var(--accent);
+            transform: rotate(45deg);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: rotate(45deg) translateY(0);
+            }
+            50% {
+                transform: rotate(45deg) translateY(8px);
+            }
+        }
+
+        /* About section */
+        .about-section {
+            background: white;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .section-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            margin: 1.5rem auto 0;
+        }
+
+        .about-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text);
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .about-text::first-letter {
+            font-size: 3.5em;
+            font-family: 'Crimson Pro', serif;
+            font-weight: 600;
+            color: var(--accent);
+            float: left;
+            line-height: 0.8;
+            margin: 0.1em 0.1em 0 0;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1.5rem;
@@ -187,6 +278,22 @@
             h1 {
                 margin-bottom: 1rem;
             }
+
+            .scroll-indicator {
+                bottom: 1rem;
+            }
+
+            .about-section {
+                padding: 4rem 1.5rem;
+            }
+
+            .about-text {
+                text-align: left;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
     </style>
 </head>
@@ -207,6 +314,41 @@
                 </p>
             </div>
         </div>
+        
+        <div class="scroll-indicator" onclick="document.querySelector('.about-section').scrollIntoView({behavior: 'smooth'})">
+            <span>Learn More</span>
+            <div class="scroll-arrow"></div>
+        </div>
     </div>
+
+    <section class="about-section">
+        <div class="about-content">
+            <h2 class="section-title">About the Project</h2>
+            <p class="about-text">
+                Understanding mobility patterns is essential for developing sustainable and equitable transport policies, yet current approaches are often fragmented and fail to account for the complexity of urban systems and diverse community needs. Traditional transport planning has centered on an average traveler with disproportionate emphasis on commuting, despite data showing that commuting represents only 13% of trips in England compared to higher percentages for shopping, education, and social visits. While agent-based models have introduced more demographic diversity, they still struggle to capture behavioral heterogeneity, particularly among vulnerable populations, reflecting a utilitarian one-size-fits-all approach that overlooks structural inequalities. This research aims to address these gaps by developing mobility profiles that combine multiple data sources, drawing inspiration from geodemographics, which has successfully mapped demographic groups at fine spatial scales. The project will integrate Smart Data capturing detailed travel behaviors (accessed through the Healthy and Sustainable Places data service), high-resolution geodemographic classifications from the Geographic Data Service, traditional survey data like the National Travel Survey, and potentially open data from transport providers such as Transport for London and Greater Manchester's network. This approach seeks to create comparable methodologies for mapping mobility patterns at fine spatial scales, filling a critical gap in understanding travel behavior diversity.
+            </p>
+        </div>
+    </section>
+
+    <script>
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.about-content').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s ease-out';
+            observer.observe(el);
+        });
+    </script>
 </body>
 </html>
