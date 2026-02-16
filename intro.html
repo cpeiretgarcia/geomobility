@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introducing Geomobility</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a3a52;
+            --accent: #e85d35;
+            --light: #f5f3ef;
+            --text: #2c2c2c;
+            --text-light: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated geometric background */
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            z-index: 0;
+            background-image: 
+                linear-gradient(var(--primary) 1px, transparent 1px),
+                linear-gradient(90deg, var(--primary) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridShift 20s linear infinite;
+        }
+
+        @keyframes gridShift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .accent-shape {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent), transparent);
+            opacity: 0.1;
+            filter: blur(80px);
+            z-index: 0;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .accent-shape:nth-child(1) {
+            top: -10%;
+            right: -10%;
+        }
+
+        .accent-shape:nth-child(2) {
+            bottom: -10%;
+            left: -10%;
+            animation-delay: -7s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 30px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(245, 243, 239, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(26, 58, 82, 0.1);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        nav .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        nav a.back-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        nav a.back-link:hover {
+            color: var(--accent);
+        }
+
+        nav a.back-link::before {
+            content: '← ';
+        }
+
+        /* Article */
+        article {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-meta {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 600;
+            color: var(--primary);
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .decorative-line {
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+            margin: 0 auto 2rem;
+        }
+
+        .intro-text {
+            font-size: 1.15rem;
+            color: var(--text-light);
+            line-height: 1.8;
+            font-weight: 400;
+        }
+
+        /* Article body */
+        .article-body {
+            background: white;
+            padding: 3rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+        }
+
+        .article-body h2 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 2.5rem 0 1.5rem;
+            position: relative;
+        }
+
+        .article-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .article-body h2::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background: var(--accent);
+            margin-top: 0.75rem;
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+            line-height: 1.9;
+            color: var(--text);
+        }
+
+        .article-body ol {
+            margin: 2rem 0;
+            padding-left: 2rem;
+            color: var(--text);
+        }
+
+        .article-body li {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            padding-left: 0.5rem;
+        }
+
+        .article-body li::marker {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Back link */
+        .back-to-home {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .back-to-home a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+
+        .back-to-home a::before {
+            content: '← ';
+        }
+
+        .back-to-home a:hover {
+            transform: translateX(-4px);
+        }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            article {
+                padding: 7rem 1.5rem 3rem;
+            }
+
+            .article-body {
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .article-body h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div class="accent-shape"></div>
+    <div class="accent-shape"></div>
+
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">Geomobility</a>
+            <a href="index.html" class="back-link">Back to Home</a>
+        </div>
+    </nav>
+
+    <article>
+        <header class="article-header">
+            <div class="post-meta">February 2025 · Project Update</div>
+            <h1>Introducing Geomobility</h1>
+            <div class="decorative-line"></div>
+            <p class="intro-text">
+                A new research initiative to develop mobility profiles that capture the diversity of how people travel across our cities.
+            </p>
+        </header>
+
+        <div class="article-body">
+            <h2>Context</h2>
+
+            <p>
+                Understanding travel patterns is important for developing more sustainable and inclusive travel policies. Travel patterns are heterogeneous. While a large amount of people engage in daily commutes to match traditional 9am-5pm office hours, many others work outside those hours—e.g. shift workers, night workers. Some people have simple daily travel patterns—e.g. home-work-home—while others engage in complex activity chains—e.g. home → school drop off → work—. Additionally, not everybody uses the same modes of transport: while some drive, others use public transport or active travel—i.e. walking or cycling—daily. Since not everybody travels the same way, we need to plan for all sorts of trips, not just those undertaken by the majority, if we want our transport systems to be truly inclusive.
+            </p>
+
+            <p>
+                Traditionally, transport policies have been designed around the needs of the assumed "average traveller". This has placed a disproportionate emphasis in commuting, even though it represents only a fraction of overall mobility—according to the 2023 National Travel Survey, in England, just 13% of trips were for commuting compared to 18% for shopping, 13% for education, and 13% for visiting friends. Although some transport modelling approaches—e.g. agent-based modelling—have broadened this narrow focus by incorporating demographic diversity, they still fall short in capturing behavioural and attitudinal heterogeneity, particularly amongst vulnerable populations.
+            </p>
+
+            <h2>The Project</h2>
+
+            <p>
+                This project aims at producing mobility profiles by combining existing and novel data sources. The profiles will be generated using data on digital traces accessed via the Healthy and Sustainable Places (HASP) data service and the high-resolution geodemographic classification generated by the Geographic Data Service (GeoDS). These novel sources will be integrated with the National Travel Survey (NTS). The project's objectives are:
+            </p>
+
+            <ol>
+                <li>Use cluster analysis to extract mobility profiles from Locomizer and Spectus data sets obtained through the HASP Data Service.</li>
+                
+                <li>Use classification algorithms to match profiles to demographic attributes, generating geomobility profiles. The profiles will be matched to the 2021 OA classification developed by the GeoDS using cluster membership classifiers.</li>
+                
+                <li>Use accessibility analysis to evaluate how the current transport system serves—or not—the needs of travellers.</li>
+                
+                <li>Create an open, interactive tool to explore the spatial distribution of the profiles.</li>
+                
+                <li>Disseminate results through academic papers, conferences, and illustrations.</li>
+            </ol>
+
+            <p>
+                I will try my best to update this site with the latest news, outputs, and updates on the project.
+            </p>
+
+            <div class="back-to-home">
+                <a href="index.html">Back to Geomobility Home</a>
+            </div>
+        </div>
+    </article>
+
+    <footer>
+        <p>&copy; 2025 Clara Peiret-García · Geomobility Project</p>
+    </footer>
+</body>
+</html>
