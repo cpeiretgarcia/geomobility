@@ -55,34 +55,6 @@
             100% { transform: translate(50px, 50px); }
         }
 
-        .accent-shape {
-            position: fixed;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--accent), transparent);
-            opacity: 0.1;
-            filter: blur(80px);
-            z-index: 0;
-            animation: float 15s ease-in-out infinite;
-        }
-
-        .accent-shape:nth-child(1) {
-            top: -10%;
-            right: -10%;
-        }
-
-        .accent-shape:nth-child(2) {
-            bottom: -10%;
-            left: -10%;
-            animation-delay: -7s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, 30px); }
-        }
-
         /* Navigation */
         nav {
             position: fixed;
@@ -292,8 +264,6 @@
 </head>
 <body>
     <div class="background-grid"></div>
-    <div class="accent-shape"></div>
-    <div class="accent-shape"></div>
 
     <nav>
         <div class="container">
