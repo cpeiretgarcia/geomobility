@@ -1,0 +1,30 @@
+---
+title: "Descriptive statistics"
+format: html
+---
+
+# Introduction
+
+This document generates descriptive statistics underpinning the geomobility classification.
+
+```{r}
+# Load ProjectTemplate
+library(ProjectTemplate)
+load.project()
+```
+
+We load the data set we have generated using the scripts in the `munge` section, specifically:
+
+- `./munge/01_var_mapping.R`
+- `./munge/02_var_travel.R`
+
+These scripts clean demographic and travel-related variables from the NTS dataset and generate a new dataset called `nts_combined_variables.parquet`, which contains demo and travel information at individual level.
+
+```{r}
+# Load necessary data
+nts_combined <- read_parquet('./data/processed/nts_combined_variables.parquet')
+```
+
+We will keep 2024 observations only. These can be filtered from the first 4 digits of the `PSUID` variable.
+
+
