@@ -67,6 +67,13 @@ nts_demographics <- read_parquet("./data/processed/nts_demo_variables.parquet")
 ##                        DATA FILTERING                        ##
 ##################################################################
 
+# Keep only 2024 data
+nts_individual  <- nts_individual  %>% filter(SurveyYear == 2024)
+nts_household   <- nts_household   %>% filter(SurveyYear == 2024)
+nts_trip        <- nts_trip        %>% filter(SurveyYear == 2024)
+nts_stage       <- nts_stage       %>% filter(SurveyYear == 2024)
+nts_day         <- nts_day         %>% filter(SurveyYear == 2024)
+
 # Remove invalid / dead trips before building any derived variables.
 # Negative values (-8 = NA, -9 = DNA, -10 = DEAD) are used throughout NTS.
 # We filter on the key variables used in construction below.

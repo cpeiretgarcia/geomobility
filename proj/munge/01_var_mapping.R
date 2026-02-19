@@ -27,6 +27,18 @@ nts_household <- read.table(
 )
 
 ##################################################################
+##                         DATA FILTERING                       ##
+##################################################################
+
+# Filter all source tables to 2024 at point of loading
+# SurveyYear is the documented year identifier in the NTS
+# Using this rather than extracting from PSUID, which is an 
+# undocumented implementation detail of the SQL database
+
+nts_individual  <- nts_individual  %>% filter(SurveyYear == 2024)
+nts_household   <- nts_household   %>% filter(SurveyYear == 2024)
+
+##################################################################
 ##                      VARIABLE SELECTION                      ##
 ##################################################################
 
@@ -200,7 +212,7 @@ nts_merged <- individual_vars %>%
 # ==============================================================================
 
 # Create age categories to reduce the number of factor levels.
-mutate(
+nts_merged <- nts_merged |> mutate(
   # Census v02: Aged 0-4 years
   census_age_0_4 = case_when(
     Age_B01ID %in% c(1, 2, 3) ~ 1,
@@ -265,12 +277,11 @@ mutate(
 # SAVE SELECTED VARIABLES
 # ==============================================================================
 
-# Save to CSV
-# write.csv(nts_merged, "nts_selected_variables.csv", row.names = FALSE)
+# Create directory to save the data
+dir.create("./data/processed")
 
-# Save to RDS (preserves R data types)
-# saveRDS(nts_merged, "nts_selected_variables.rds")
-
+# Save to parquet
+write_parquet(nts_merged, "./data/processed/nts_demo_variables.parquet")
 
 # ==============================================================================
 # IMPORTANT NOTES
