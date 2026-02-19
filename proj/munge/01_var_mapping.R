@@ -57,70 +57,32 @@ individual_vars <- nts_individual %>%
     PersNo,            # Person number within household
     
     # === DEMOGRAPHICS ===
-    # Census v02-v07: Age groups (4 and under, 5-14, 25-44, 45-64, 65-84, 85+)
+    # Age groups
     Age_B01ID,         # Age of person - banded age - 21 categories
-                       # Use this for detailed age analysis
-                       # Alternative: Age_B04ID has 9 broader categories
     
-    # Census v24-v26: Marital status (never married, married/civil partnership, separated/divorced)
+    # Marital status
     MaritalStat_B01ID, # Marital status
-                       # Includes all marital status categories
-                       # Matches census categories well
     
     # === ETHNICITY & ORIGINS (LIMITED IN NTS) ===
-    # Census v08-v11: Country of birth (PARTIAL MATCH - less detail in NTS)
-    COB_B01ID,         # Country of Birth - 7 categories
-                       # NTS has less geographic detail than census
-                       # Categories may need aggregation
-    
-    # Census v12-v19: Ethnic groups (POOR MATCH - only 2 categories in NTS)
+    # Ethnic groups
     EthGroupTS_B02ID,  # Ethnic Group - 2 categories only (White/Non-White)
-                       # Much less detailed than census
-                       # Use with caution for ethnicity analysis
-    
-    # === HOUSEHOLD & LIVING ARRANGEMENTS ===
-    # Census v24-v26: Marital status covered above
-    
-    # Census v27-v30: Household structure (PARTIAL MATCH)
-    # Note: This is in the Household table, see below
-    
+        
     # === UNPAID CARE ===
-    # Census v43: Provides unpaid care
-    Carer_B01ID,       # Whether carer for family or friends
-                       # Good match to census variable
-    
-    Caretime_B01ID,    # Hours a week as carer (bonus variable)
-                       # Provides additional detail not in census
+    # Whether carer for others    
+    Caretime_B01ID,    # Hours a week as carer
     
     # === EDUCATION ===
-    # Census v45-v47: Highest level of qualification (Level 1-2, Level 3, Level 4+)
+    # Highest level of qualification (Level 1-2, Level 3, Level 4+)
     EdAttn3_B01ID,     # Level of highest qualification
-                       # Good match to census categories
-                       # Also available: EdAttn1_B01ID (any certificated qualifications)
-                       #                 EdAttn2_B01ID (professional qualifications)
-                       #                 EdAttn4_B02ID (grouped qualifications)
     
     # === EMPLOYMENT ===
-    # Census v48-v49: Hours worked (Part-time/Full-time) (PARTIAL MATCH)
-    # Census v60: Economically active: Unemployed
+    # Working status
     EcoStat_B02ID,     # Working status - 6 categories
-                       # Includes employed FT, employed PT, unemployed, etc.
-                       # Partial match as categories may differ from census
-    
-    # Alternative employment variables:
-    # EcoStat_B03ID,   # Working status - 4 categories (broader)
-    # ES2020_B01ID,    # Employment Status - 2020 bandings
-    
-    # Census v50: NS-SeC Full-time students
-    NSSec_B03ID,       # National Statistics Socio-Economic Classification
-                       # 5 categories high level breakdown
-                       # Good match to census NS-SeC
     
     # === SEX ===
     Sex_B01ID          # Sex of person
                        # Not in your census list but useful for analysis
   )
-
 
 # ==============================================================================
 # SELECT VARIABLES FROM HOUSEHOLD TABLE
@@ -134,61 +96,27 @@ household_vars <- nts_household %>%
     
     # === GEOGRAPHIC ===
     HHoldGOR_B02ID,    # Household Region
-                       # Useful for geographic analysis
-    
-    HHoldCountry_B01ID, # Country of residence
-                        # England, Scotland, Wales
     
     # === HOUSEHOLD COMPOSITION ===
-    # Census v27-v30: Household structure (one-person, families with/without children)
     HHoldStruct_B02ID, # Household structure - 6 categories
-                       # PARTIAL MATCH - categories may not align perfectly
-                       # Compare categories before use
-    
-    HHoldNumAdults,    # Number of adults in household (actual count)
-                       # Useful for creating custom household types
     
     HHoldNumChildren,  # Number of children in household (actual count)
-                       # Useful for creating custom household types
     
     HHoldNumPeople,    # Total number of people in household
-                       # Useful for household size analysis
     
     # === HOUSING ===
-    # Census v33-v36: Property type (Detached, Semi-detached, Terraced, Flat)
     AddressType_B01ID, # Type of property
-                       # Good match to census categories
     
-    # Census v37-v39: Tenure (Owned, Social rented, Private rented)
     Ten1_B02ID,        # Type of tenancy - 3 categories
-                       # Good match to census categories
-                       # Owned/shared ownership, social rented, private rented
     
-    # Census v32: Length of residence (PARTIAL MATCH)
     HLongAN_B01ID,     # How long lived at address
-                       # Available in some years only (check year coverage)
-                       # May not align exactly with census "1 year ago" measure
     
     # === VEHICLES ===
-    # Census v44: 2 or more cars/vans in household (EXCELLENT MATCH)
-    NumCarVan,         # Number of cars/vans - actual count
-                       # Can create "2+" category to match census
-    
-    NumCarVan_B02ID,   # Number of cars/vans - 3 categories
-                       # Pre-banded, may include a "2+" category
-    
     NumCar,            # Number of cars only (excludes vans)
                        # Bonus variable for detailed analysis
     
-    NumBike,           # Number of bicycles
-                       # Bonus variable - not in census
-    
-    NumMCycle,         # Number of motorcycles
-                       # Bonus variable - not in census
-    
     # === INCOME ===
     HHIncQDS2008_B01ID, # Household income - Year-specific income quintiles
-                        # Note: Household income - 3 categories also available
     
     # === WEIGHTS ===
     W2,                # Weighted diary sample
