@@ -36,36 +36,20 @@ This paper presents the methodology to classify neighbourhoods based on the obse
 \section{Literature Review}
 
 \section{Methods}
+We selected a set of demographic variables (Table \ref{tab:demo_variables}) to describe the personal and household-level characteristics of the individuals in the sample.
 
-% ============================================================
-% Variable Reference Table
-% NTS-based Travel Behaviour and Demographic Classification
-% ============================================================
-% Requires in preamble:
-%   \usepackage{booktabs}
-%   \usepackage{longtable}
-%   \usepackage{array}
-%   \usepackage{ragged2e}
-%   \usepackage{xcolor}
-%   \usepackage{caption}
-% ============================================================
+\begin{longtable}{>{\ttfamily\small}p{4.8cm} >{\small}p{2.4cm} >{\RaggedRight\small}p{6.6cm}}
 
-\begin{longtable}{>{\ttfamily\small}p{4.8cm} >{\small}p{2.2cm} >{\RaggedRight\small}p{6.8cm}}
-
-\caption{Variables used in the travel behaviour and demographic clustering analysis.
-         All variables are sourced from the National Travel Survey (NTS) 2024.
-         Diary-derived variables are computed from the 7-day travel diary;
-         self-reported variables are from the interview questionnaire.}
-\label{tab:variables} \\
+\label{tab:demo_variables} \\
 
 \toprule
-\normalfont\textbf{Variable} & \textbf{Type} & \textbf{Description} \\
+\normalfont\textbf{NTS Variable} & \textbf{Type} & \textbf{Description} \\
 \midrule
 \endfirsthead
 
-\multicolumn{3}{l}{\small\textit{Table \ref{tab:variables} continued from previous page}} \\[4pt]
+\multicolumn{3}{l}{\small\textit{Table \ref{tab:demo_variables} continued from previous page}} \\[4pt]
 \toprule
-\normalfont\textbf{Variable} & \textbf{Type} & \textbf{Description} \\
+\normalfont\textbf{NTS Variable} & \textbf{Type} & \textbf{Description} \\
 \midrule
 \endhead
 
@@ -77,303 +61,104 @@ This paper presents the methodology to classify neighbourhoods based on the obse
 \endlastfoot
 
 % ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{A. Individual demographic variables}}} \\[3pt]
+\multicolumn{3}{l}{\textbf{Individual-level demographic variables}} \\[3pt]
 % ------------------------------------------------------------------
 
 Sex\_B01ID
   & Binary
-  & Sex of respondent (male / female). \\[4pt]
+  & Sex of the respondent (male / female). \\[4pt]
 
 Age\_B01ID
   & Ordinal
-  & Age of respondent in 21 banded categories (under 1 to 80+). \\[4pt]
+  & Age of the respondent in 21 banded categories,
+    ranging from under 1 year to 80 and over. \\[4pt]
 
 MaritalStat\_B01ID
   & Categorical
-  & Legal marital status. \\[4pt]
+  & Legal marital status, including never married,
+    married or in a civil partnership, separated,
+    divorced, and widowed. \\[4pt]
 
 EthGroupTS\_B02ID
   & Binary
-  & Ethnic group. Two categories: White; Non-White. \\[4pt]
-
-COB\_B01ID
-  & Categorical
-  & Country of birth in 7 categories. \\[4pt]
+  & Ethnic group, time-series consistent classification:
+    White; Non-White. \\[4pt]
 
 EcoStat\_B02ID
   & Categorical
-  & Economic activity status in 6 categories. \\[4pt]
-
-NSSec\_B03ID
-  & Ordinal
-  & National Statistics Socio-Economic Classification (NS-SEC)
-    at the 5-category high-level breakdown. \\[4pt]
+  & Economic activity status in 6 categories: employed
+    full-time; employed part-time; unemployed;
+    economically inactive (retired or permanently sick);
+    economically inactive (student); economically
+    inactive (other). \\[4pt]
 
 EdAttn3\_B01ID
   & Ordinal
-  & Highest educational qualification attained. \\[4pt]
+  & Highest educational qualification attained, ranging
+    from no qualifications to degree level and above. \\[4pt]
 
-Carer\_B01ID
-  & Binary
-  & Whether the respondent provides unpaid care for a family member
-    or friend. \\[4pt]
+Caretime\_B01ID
+  & Ordinal
+  & Hours per week spent providing unpaid care for a
+    family member or friend, in banded categories. \\[4pt]
 
 % ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{B. Household demographic variables}}} \\[3pt]
+\multicolumn{3}{l}{\textbf{Household-level demographic variables}} \\[3pt]
 % ------------------------------------------------------------------
-
-HHoldStruct\_B02ID
-  & Categorical
-  & Household structure in 6 categories. \\[4pt]
-
-HHoldNumAdults
-  & Count
-  & Number of adults (aged 18+) in the household. \\[4pt]
-
-HHoldNumChildren
-  & Count
-  & Number of children (aged under 18) in the household. \\[4pt]
-
-Ten1\_B02ID
-  & Categorical
-  & Tenure type in 3 categories. \\[4pt]
-
-AddressType\_B01ID
-  & Categorical
-  & Dwelling type. \\[4pt]
-
-NumCarVan\_B02ID
-  & Ordinal
-  & Number of cars or light vans available to the household
-    in 3 banded categories. \\[4pt]
-
-HHIncQDS2008\_B01ID
-  & Ordinal
-  & Equivalised household income quintile derived from the
-    diary sample, using 2008 bandings. \\[4pt]
 
 HHoldGOR\_B02ID
   & Categorical
-  & Government Office Region of the household's residence. \\[4pt]
+  & Government Office Region of the household's usual
+    residence. \\[4pt]
 
-Settlement2021EW\_B02ID
+HHoldStruct\_B02ID
   & Categorical
-  & Urban--rural classification of residence based on the
-    2021 Census in 3 categories: urban, rural, and other. \\[4pt]
+  & Household structure in 6 categories, including
+    one-person households, couples with and without
+    dependent children, and lone-parent households. \\[4pt]
 
-% ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{C. Modal profile (diary-derived)}}} \\[3pt]
-% ------------------------------------------------------------------
+HHoldNumChildren
+  & Count
+  & Number of children (aged under 16) in the
+    household. \\[4pt]
 
-walk\_share
-  & Continuous
-  & Proportion of diary trips made on foot, ranging from 0 to 1. \\[4pt]
+HHoldNumPeople
+  & Count
+  & Total number of people living in the household. \\[4pt]
 
-cycle\_share
-  & Continuous
-  & Proportion of diary trips made by pedal cycle, ranging from 0 to 1. \\[4pt]
-
-car\_driver\_share
-  & Continuous
-  & Proportion of diary trips as a car or van driver,
-    ranging from 0 to 1. \\[4pt]
-
-car\_pass\_share
-  & Continuous
-  & Proportion of diary trips as a car or van passenger,
-    ranging from 0 to 1. \\[4pt]
-
-pt\_share
-  & Continuous
-  & Proportion of diary trips by public transport (bus, rail,
-    underground, and taxi), ranging from 0 to 1. \\[4pt]
-
-active\_share
-  & Continuous
-  & Proportion of diary trips by active modes (walking and cycling
-    combined), ranging from 0 to 1. \\[4pt]
-
-main\_mode
+AddressType\_B01ID
   & Categorical
-  & The single mode group accounting for the highest share of
-    diary trips. One of: walk, cycle, car, public transport,
-    or other. \\[4pt]
+  & Type of dwelling (detached, semi-detached,
+    terraced, flat or maisonette, and other). \\[4pt]
 
-mode\_entropy
-  & Continuous
-  & Shannon entropy of the distribution of trips across the five
-    mode groups ($H = -\sum p_i \ln p_i$). Higher values indicate
-    greater modal diversity. \\[4pt]
-
-% ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{D. Activity profile (diary-derived)}}} \\[3pt]
-% ------------------------------------------------------------------
-
-commute\_share
-  & Continuous
-  & Proportion of diary trips made for commuting purposes. \\[4pt]
-
-business\_share
-  & Continuous
-  & Proportion of diary trips made for employer's business. \\[4pt]
-
-education\_share
-  & Continuous
-  & Proportion of diary trips for education or escorting
-    to education. \\[4pt]
-
-shopping\_share
-  & Continuous
-  & Proportion of diary trips for shopping. \\[4pt]
-
-escort\_share
-  & Continuous
-  & Proportion of diary trips for escorting purposes
-    other than education. \\[4pt]
-
-personal\_share
-  & Continuous
-  & Proportion of diary trips for personal business
-    (e.g.\ medical appointments, banking). \\[4pt]
-
-leisure\_share
-  & Continuous
-  & Proportion of diary trips for leisure and recreational
-    activities. \\[4pt]
-
-dominant\_activity
+Ten1\_B02ID
   & Categorical
-  & The single trip purpose accounting for the highest share
-    of diary trips. \\[4pt]
+  & Tenure type in 3 categories: owned or shared
+    ownership; social rented; private rented. \\[4pt]
 
-activity\_entropy
-  & Continuous
-  & Shannon entropy of the distribution of trips across the eight
-    purpose categories. Higher values indicate a more varied
-    daily activity programme. \\[4pt]
-
-% ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{E. Trip characteristics (diary-derived)}}} \\[3pt]
-% ------------------------------------------------------------------
-
-mean\_trips\_per\_day
-  & Continuous
-  & Average number of trips per day, computed as total diary trips
-    divided by 7. \\[4pt]
-
-mean\_stages\_per\_trip
-  & Continuous
-  & Average number of stages per trip across the diary week.
-    A proxy for journey complexity and multimodality. \\[4pt]
-
-mean\_trip\_dist\_miles
-  & Continuous
-  & Mean trip distance in miles, excluding short walk legs
-    (\texttt{TripDisExSW}). \\[4pt]
-
-total\_dist\_week\_miles
-  & Continuous
-  & Total distance travelled across the diary week in miles,
-    including all trip legs. \\[4pt]
-
-local\_trip\_share
-  & Continuous
-  & Proportion of diary trips under 2 miles. Captures the degree
-    of hyperlocal travel behaviour. \\[4pt]
-
-long\_trip\_share
-  & Continuous
-  & Proportion of diary trips over 25 miles. Captures the frequency
-    of longer-distance travel. \\[4pt]
-
-peak\_share
-  & Continuous
-  & Proportion of trips departing during AM peak (07:00--08:59)
-    or PM peak (16:00--17:59). \\[4pt]
-
-weekend\_share
-  & Continuous
-  & Proportion of diary trips made on a Saturday or Sunday. \\[4pt]
-
-mean\_start\_time\_mins
-  & Continuous
-  & Mean trip departure time expressed in minutes past midnight.
-    Captures habitual early or late travel patterns. \\[4pt]
-
-mean\_trip\_time\_mins
-  & Continuous
-  & Mean total trip duration in minutes, including waiting
-    and walking time at each end. \\[4pt]
-
-mean\_daily\_travel\_time\_mins
-  & Continuous
-  & Mean time spent travelling per day in minutes, computed
-    as total weekly travel time divided by 7. \\[4pt]
-
-mean\_party\_size
-  & Continuous
-  & Mean number of people travelling together per trip,
-    derived from stage-level party size. \\[4pt]
-
-solo\_travel\_share
-  & Continuous
-  & Proportion of trips made alone (party size of one). \\[4pt]
-
-% ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{F. Self-reported mode use frequencies (interview)}}} \\[3pt]
-% ------------------------------------------------------------------
-
-freq\_car
+HLongAN\_B01ID
   & Ordinal
-  & Self-reported frequency of private car use, recoded to a
-    0--6 numeric scale (0 = never; 6 = three or more days
-    per week). \\[4pt]
+  & Length of time the household has lived at the
+    current address, in banded categories. \\[4pt]
 
-freq\_bus
+NumCar
+  & Count
+  & Number of cars available to the household
+    (excludes vans and other light goods vehicles). \\[4pt]
+
+HHIncQDS2008\_B01ID
   & Ordinal
-  & Self-reported frequency of local bus use (0--6 scale). \\[4pt]
+  & Equivalised household income quintile derived
+    from the diary sample, using 2008 income bandings
+    for time-series consistency. \\[4pt]
 
-freq\_train
-  & Ordinal
-  & Self-reported frequency of surface rail use (0--6 scale). \\[4pt]
-
-freq\_walk
-  & Ordinal
-  & Self-reported frequency of walking for 20 minutes or more
-    without stopping (0--6 scale). \\[4pt]
-
-freq\_cycle
-  & Ordinal
-  & Self-reported frequency of bicycle use (0--6 scale). \\[4pt]
-
-freq\_taxi
-  & Ordinal
-  & Self-reported frequency of taxi or minicab use
-    (0--6 scale). \\[4pt]
-
-freq\_phv
-  & Ordinal
-  & Self-reported frequency of app-based private hire vehicle
-    use (e.g.\ Uber), recoded to the same 0--6 scale. \\[4pt]
-
-% ------------------------------------------------------------------
-\multicolumn{3}{l}{\textit{\textbf{G. Work from home and digital substitution (interview)}}} \\[3pt]
-% ------------------------------------------------------------------
-
-wfh\_any
-  & Binary
-  & Whether the respondent worked from home on at least one day
-    during the diary week (1 = yes; 0 = no). \\[4pt]
-
-wfh\_frequency
-  & Ordinal
-  & Usual frequency of working from home, recoded to a 0--6
-    numeric scale (0 = never; 6 = three or more times
-    per week). \\[4pt]
-
+\caption{Variables used in the analysis, sourced from the National Travel Survey (NTS) 2024.
+         Demographic variables are drawn from the individual and household interview files.
+         Travel behaviour variables are derived from the 7-day travel diary unless
+         otherwise indicated.}
 \end{longtable}
 
-\subsection{}
+
 
 \section{Results}
 Present your results.
