@@ -33,14 +33,22 @@ Your abstract goes here. This is a brief summary of your article.
 
 This paper presents the methodology to classify neighbourhoods based on the observed mobility behaviours of their residents. Similar to existing geodemographic classifications \citep{wyszomierski2024neighbourhood}.
 
-\section{Literature Review}
+In this paper we employ Multinomial Regression and Poststratification (MRP) to map transport behaviours at small area level.
+
+\section{Background}
+
+\subsection{Building area-level profiles from individual survey responses}
+
+It is not uncommon that, when using survey data, we find ourselves in the situation where the data has been captured at a specific spatial level, but we want to draw estimations at a higher spatial resolution level. In these cases, the survey will not be representative, since it has been designed for a coarser spatial resolution. This results in areas not having enough observations for deriving robust estimations. This is a typical problem of small-area estimation. Multilevel regression and poststratification (MRP) is an increasingly popular approach to deriving robust estimates from non-representative survey samples at small area level. MRP has traditionally been used in polling to estimate voting counts by constituency. 
+
+Multilevel regression and poststratification (MRP) is an increasingly popular tool for adjusting a non-representative sample to a larger population. In particular, MRP appears to be effective in areas where conventional design-based survey approaches have traditionally struggled, notably small-area estimation (Rao, 2014; Pfeffermann et al., 2013; Zhang et al., 2014) and with convenience sampling (Wang et al., 2015).
+
+One difference between MRP and traditional poststratified design-based weights is that MRP uses partial pooling. Simple poststratification has difficulties with empty cells, in which case the usual practice is to poststratify only on marginals (thus ignoring interactions), or pool cells together. In contrast, the partial pooling of multilevel modeling automatically regularizes group estimates.
 
 \section{Methods}
 We selected a set of demographic variables (Table \ref{tab:demo_variables}) to describe the personal and household-level characteristics of the individuals in the sample.
 
 \begin{longtable}{>{\ttfamily\small}p{4.8cm} >{\small}p{2.4cm} >{\RaggedRight\small}p{6.6cm}}
-
-\label{tab:demo_variables} \\
 
 \toprule
 \normalfont\textbf{NTS Variable} & \textbf{Type} & \textbf{Description} \\
@@ -156,9 +164,14 @@ HHIncQDS2008\_B01ID
          Demographic variables are drawn from the individual and household interview files.
          Travel behaviour variables are derived from the 7-day travel diary unless
          otherwise indicated.}
+\label{tab:demo_variables}
 \end{longtable}
 
+\subsubsection{Multilevel Regression with Post-stratification}
 
+
+
+One of the most well-known uses of MRP is the generation of electoral forecasts using non-representative polls. Intuitively, MRP works in two stages. First, we need to gather individual-level information from a survey with information on both our variable of interest and demographic and socioeconomic attributes of the respondents. Using this data, we estimate a model that predicts the variable of interest based on the socio-demographic attributes at individual level. This steps helps identify which demographic subgroups are more likely to present the variable of interest. In the second step, we gather aggregated data about the small areas of interest, usually from the census, and estimate the presence of those identified subgroups at the small area level. This allows us to estimate the prevalence of the variable of interest in the area weighted by the frequency of the subgroups at the unit of interest.
 
 \section{Results}
 Present your results.
@@ -173,6 +186,6 @@ Discuss your findings.
 Your conclusions.
 
 \bibliographystyle{apalike}
-\bibliography{references.bib}
+\bibliography{docs/references.bib}
 
 \end{document}

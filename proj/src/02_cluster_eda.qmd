@@ -1,0 +1,164 @@
+---
+title: "Clustering dataset: exploratory data analysis"
+format: html
+---
+
+```{r setup}
+#| message: false
+library(here)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+```
+
+```{r load}
+source(here::here("proj/munge/01_cluster_prep.R"))
+```
+
+## Overview
+
+```{r overview}
+glimpse(indiv_cluster_df)
+```
+
+```{r summary}
+summary(indiv_cluster_df)
+```
+
+Number of individuals: `r nrow(indiv_cluster_df)`
+
+Missing values per variable:
+
+```{r missing}
+indiv_cluster_df |>
+  summarise(across(everything(), ~ sum(is.na(.)))) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "n_missing") |>
+  filter(n_missing > 0) |>
+  arrange(desc(n_missing))
+```
+
+---
+
+## Trip volume and distance
+
+```{r vol-dist-hist}
+indiv_cluster_df |>
+  select(n_trips, total_distance, share_long_trips) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "value") |>
+  ggplot(aes(x = value)) +
+  geom_histogram(bins = 40, fill = "steelblue", colour = "white") +
+  facet_wrap(~ variable, scales = "free") +
+  labs(x = NULL, y = "Count") +
+  theme_minimal()
+```
+
+---
+
+## Modal choice
+
+```{r modal-choice}
+indiv_cluster_df |>
+  count(modal_choice) |>
+  mutate(
+    mode = case_when(
+      modal_choice == 1 ~ "Walk",
+      modal_choice == 2 ~ "Cycle",
+      modal_choice == 3 ~ "Car driver",
+      modal_choice == 4 ~ "Car passenger",
+      modal_choice == 5 ~ "Bus",
+      modal_choice == 6 ~ "Rail",
+      modal_choice == 7 ~ "Other"
+    ),
+    pct = n / sum(n) * 100
+  ) |>
+  arrange(desc(n)) |>
+  ggplot(aes(x = reorder(mode, n), y = pct)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(x = NULL, y = "% of individuals") +
+  theme_minimal()
+```
+
+---
+
+## Mode shares
+
+```{r mode-share-dist}
+indiv_cluster_df |>
+  select(share_walk, share_cycle, share_car_driver, share_car_pass,
+         share_bus, share_rail, share_other) |>
+  pivot_longer(everything(), names_to = "mode", values_to = "share") |>
+  ggplot(aes(x = share)) +
+  geom_histogram(bins = 30, fill = "steelblue", colour = "white") +
+  facet_wrap(~ mode, scales = "free_y") +
+  labs(x = "Share of trips", y = "Count") +
+  theme_minimal()
+```
+
+Mean mode shares across individuals:
+
+```{r mode-share-means}
+indiv_cluster_df |>
+  summarise(across(c(share_walk, share_cycle, share_car_driver, share_car_pass,
+                     share_bus, share_rail, share_other),
+                   mean, na.rm = TRUE)) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "mean_share") |>
+  arrange(desc(mean_share))
+```
+
+---
+
+## Trip purpose mix
+
+```{r purpose-dist}
+indiv_cluster_df |>
+  select(share_work, share_education, share_escort_educ,
+         share_shopping, share_escort, share_leisure) |>
+  pivot_longer(everything(), names_to = "purpose", values_to = "share") |>
+  ggplot(aes(x = share)) +
+  geom_histogram(bins = 30, fill = "coral", colour = "white") +
+  facet_wrap(~ purpose, scales = "free_y") +
+  labs(x = "Share of trips", y = "Count") +
+  theme_minimal()
+```
+
+Mean purpose shares across individuals:
+
+```{r purpose-means}
+indiv_cluster_df |>
+  summarise(across(c(share_work, share_education, share_escort_educ,
+                     share_shopping, share_escort, share_leisure),
+                   mean, na.rm = TRUE)) |>
+  pivot_longer(everything(), names_to = "variable", values_to = "mean_share") |>
+  arrange(desc(mean_share))
+```
+
+---
+
+## Correlations
+
+```{r correlations}
+#| fig-width: 8
+#| fig-height: 8
+cluster_vars <- indiv_cluster_df |>
+  select(n_trips, total_distance, share_long_trips,
+         share_walk, share_cycle, share_car_driver, share_car_pass,
+         share_bus, share_rail, share_other,
+         share_work, share_education, share_escort_educ,
+         share_shopping, share_escort, share_leisure)
+
+cor_matrix <- cor(cluster_vars, use = "pairwise.complete.obs")
+
+cor_matrix |>
+  as.data.frame() |>
+  tibble::rownames_to_column("var1") |>
+  pivot_longer(-var1, names_to = "var2", values_to = "correlation") |>
+  ggplot(aes(x = var1, y = var2, fill = correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "tomato", mid = "white", high = "steelblue",
+                       midpoint = 0, limits = c(-1, 1)) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```

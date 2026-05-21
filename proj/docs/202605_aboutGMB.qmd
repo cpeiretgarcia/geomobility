@@ -1,0 +1,27 @@
+---
+title: "Geomobility"
+subtitle: "Building Traveller Profiles from NTS Data"
+author: "Clara Peiret-García"
+format: revealjs
+---
+
+## The idea
+
+> Generating mobility profiles from National Travel Survey Data and mapping them at small-area level using MRP.
+
+## Steps
+
+1. Use segmentation analysis to generate transport profiles from NTS demographic + behavioural data.
+2. Match observations with their mobility profile label.
+3. Use MRP to map the spatial distribution of the profiles.
+
+## My understanding
+
+- Survey data must include some geographic indicator.
+- I need an outcome of interest, which is the variable to be mapped – in my case, the mobility profile label.
+- I need some anchor variables that are both available at survey-level and at census-level (for the target areas).
+
+
+## Questions
+
+- If I have used the anchor variables (e.g. age, sex, household composition, etc.) as inputs for generating the profile labels, can I then use them as predictors in the MRP model?

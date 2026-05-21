@@ -1,0 +1,344 @@
+---
+title: "Traveller profile clustering: Gower + PAM"
+format: html
+---
+
+```{r setup}
+#| message: false
+library(here)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cluster)    # daisy (Gower) and pam
+library(factoextra) # cluster visualisation
+```
+
+```{r load}
+source(here::here("proj/munge/01_cluster_prep.R"))
+```
+
+## Prepare clustering variables
+
+`modal_choice` is passed as a factor so Gower distance treats it as categorical. All continuous variables are left on their natural scale — Gower normalises each variable to [0,1] internally before combining distances, so manual standardisation is not needed.
+
+```{r prep}
+cluster_input <- indiv_cluster_df |>
+  select(
+    IndividualID,
+    # Volume & distance
+    n_trips, total_distance, share_long_trips,
+    # Modal choice (categorical)
+    modal_choice,
+    # Mode shares
+    share_walk, share_cycle, share_car_driver, share_car_pass,
+    share_bus, share_rail, share_other,
+    # Purpose mix
+    share_work, share_education, share_escort_educ,
+    share_shopping, share_escort, share_leisure
+  ) |>
+  mutate(modal_choice = factor(modal_choice, levels = 1:7,
+                                labels = c("Walk", "Cycle", "Car driver",
+                                           "Car passenger", "Bus", "Rail", "Other"))) |>
+  drop_na()
+
+cat("Individuals after dropping NA:", nrow(cluster_input), "\n")
+```
+
+## Subsample for distance matrix computation
+
+Gower distance requires an n×n matrix which is memory-prohibitive for large samples. We compute Gower + PAM on a subsample, then assign the full sample to the nearest medoid.
+
+```{r subsample}
+set.seed(42)
+sample_size <- 5000
+
+sample_idx <- sample(nrow(cluster_input), min(sample_size, nrow(cluster_input)))
+cluster_sample <- cluster_input[sample_idx, ]
+
+cat("Sample size:", nrow(cluster_sample), "\n")
+cat("Full dataset size:", nrow(cluster_input), "\n")
+```
+
+## Compute Gower distance matrix on subsample
+
+```{r gower}
+gower_dist <- daisy(
+  cluster_sample |> select(-IndividualID),
+  metric = "gower"
+)
+
+summary(gower_dist)
+```
+
+## Determine number of clusters
+
+Silhouette width across k = 2 to 8 on the subsample:
+
+```{r silhouette}
+#| fig-width: 7
+#| fig-height: 4
+sil_width <- numeric(8)
+
+for (k in 2:8) {
+  pam_fit_k <- pam(gower_dist, k = k, diss = TRUE)
+  sil_width[k] <- pam_fit_k$silinfo$avg.width
+}
+
+tibble(k = 2:8, silhouette = sil_width[2:8]) |>
+  ggplot(aes(x = k, y = silhouette)) +
+  geom_line() +
+  geom_point(size = 3) +
+  scale_x_continuous(breaks = 2:8) +
+  labs(x = "Number of clusters (k)", y = "Average silhouette width") +
+  theme_minimal()
+```
+
+Optimal k based on silhouette:
+
+```{r optimal-k}
+optimal_k <- which.max(sil_width[2:8]) + 1
+cat("Optimal k:", optimal_k, "\n")
+```
+
+## Fit PAM with optimal k on subsample
+
+```{r pam}
+pam_fit <- pam(gower_dist, k = optimal_k, diss = TRUE)
+```
+
+## Assign full sample to nearest medoid
+
+Extract medoid profiles from the subsample, then for each individual in the full dataset compute Gower distance to each medoid and assign to the closest one.
+
+```{r assign-full}
+# Extract medoid rows from the subsample
+medoid_profiles <- cluster_sample[pam_fit$id.med, ] |>
+  select(-IndividualID)
+
+# For each individual in the full dataset, compute distance to each medoid
+# and assign to the nearest one
+cluster_vars <- cluster_input |> select(-IndividualID)
+
+assign_to_medoid <- function(data, medoids) {
+  sapply(seq_len(nrow(data)), function(i) {
+    dists <- sapply(seq_len(nrow(medoids)), function(m) {
+      daisy(rbind(data[i, ], medoids[m, ]), metric = "gower")[1]
+    })
+    which.min(dists)
+  })
+}
+
+indiv_clustered <- cluster_input |>
+  mutate(cluster = factor(assign_to_medoid(cluster_vars, medoid_profiles)))
+
+cat("Cluster sizes (full sample):\n")
+print(table(indiv_clustered$cluster))
+```
+
+## Cluster summaries
+
+Medoid profiles — each row is a real individual representing their cluster:
+
+```{r medoids}
+cluster_sample[pam_fit$id.med, ] |>
+  mutate(cluster = 1:optimal_k) |>
+  select(cluster, everything(), -IndividualID)
+```
+
+Variable means by cluster (full sample):
+
+```{r cluster-means}
+indiv_clustered |>
+  group_by(cluster) |>
+  summarise(
+    n = n(),
+    across(c(n_trips, total_distance, share_long_trips,
+             share_walk, share_cycle, share_car_driver, share_car_pass,
+             share_bus, share_rail, share_other,
+             share_work, share_education, share_escort_educ,
+             share_shopping, share_escort, share_leisure),
+           mean, na.rm = TRUE)
+  )
+```
+
+Modal choice distribution by cluster (full sample):
+
+```{r modal-by-cluster}
+indiv_clustered |>
+  count(cluster, modal_choice) |>
+  group_by(cluster) |>
+  mutate(pct = n / sum(n) * 100) |>
+  ggplot(aes(x = modal_choice, y = pct, fill = cluster)) +
+  geom_col(position = "dodge") +
+  labs(x = NULL, y = "% within cluster", fill = "Cluster") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Silhouette plot
+
+Based on the subsample:
+
+```{r silhouette-plot}
+#| fig-width: 7
+#| fig-height: 6
+fviz_silhouette(pam_fit)
+```
+
+## Stability check
+
+Re-run on 5 different subsamples of the same size and compare cluster sizes:
+
+```{r stability}
+set.seed(42)
+seeds <- sample(1000, 5)
+
+stability <- lapply(seeds, function(s) {
+  set.seed(s)
+  idx <- sample(nrow(cluster_input), sample_size)
+  samp <- cluster_input[idx, ]
+  dist_s <- daisy(samp |> select(-IndividualID), metric = "gower")
+  fit_s <- pam(dist_s, k = optimal_k, diss = TRUE)
+  as.data.frame(t(table(fit_s$clustering))) |>
+    select(cluster = Var2, n = Freq)
+}) |>
+  bind_rows(.id = "run")
+
+stability
+```
+
+---
+
+## Subclustering within macro-clusters
+
+For each macro-cluster, repeat Gower + PAM independently to find subclusters. Silhouette chooses k up to a maximum of 5 per macro-cluster.
+
+```{r subcluster-fn}
+# k_override: named list to force k for specific macro-clusters,
+#   e.g. list("1" = 4). NULL means use silhouette.
+# flat_tol: if max - min silhouette across k is below this threshold,
+#   the cluster is considered homogeneous and left unsplit.
+subcluster_fn <- function(data, macro_id, sample_size = 5000, k_max = 5,
+                           k_override = NULL, flat_tol = 0.01, seed = 42) {
+  set.seed(seed)
+  cat("\n--- Macro-cluster", macro_id, "| n =", nrow(data), "---\n")
+
+  cluster_vars <- data |> select(-IndividualID)
+
+  # Subsample if needed
+  if (nrow(data) > sample_size) {
+    idx <- sample(nrow(data), sample_size)
+    samp <- cluster_vars[idx, ]
+  } else {
+    samp <- cluster_vars
+  }
+
+  # Gower distance on sample
+  dist_s <- daisy(samp, metric = "gower")
+
+  # Silhouette across k = 2:k_max
+  sil <- numeric(k_max)
+  for (k in 2:k_max) {
+    fit_k <- pam(dist_s, k = k, diss = TRUE)
+    sil[k] <- fit_k$silinfo$avg.width
+  }
+
+  # Plot silhouette
+  print(
+    tibble(k = 2:k_max, silhouette = sil[2:k_max]) |>
+      ggplot(aes(x = k, y = silhouette)) +
+      geom_line() + geom_point(size = 3) +
+      scale_x_continuous(breaks = 2:k_max) +
+      labs(title = paste("Macro-cluster", macro_id),
+           x = "k", y = "Avg silhouette width") +
+      theme_minimal()
+  )
+
+  # Check for flat silhouette — skip subclustering if homogeneous
+  sil_range <- max(sil[2:k_max]) - min(sil[2:k_max])
+  if (sil_range < flat_tol & is.null(k_override[[as.character(macro_id)]])) {
+    cat("Flat silhouette (range =", round(sil_range, 4),
+        ") — leaving cluster unsplit.\n")
+    return(data |> mutate(subcluster = paste0(macro_id, ".1")))
+  }
+
+  # Determine k: manual override takes precedence over silhouette
+  if (!is.null(k_override[[as.character(macro_id)]])) {
+    optimal_k <- k_override[[as.character(macro_id)]]
+    cat("Using manual override k =", optimal_k, "\n")
+  } else {
+    optimal_k <- which.max(sil[2:k_max]) + 1
+    cat("Optimal k (silhouette):", optimal_k, "\n")
+  }
+
+  # Fit PAM with chosen k
+  pam_sub <- pam(dist_s, k = optimal_k, diss = TRUE)
+
+  if (nrow(data) > sample_size) {
+    medoids    <- samp[pam_sub$id.med, ]
+    sub_labels <- assign_to_medoid(cluster_vars, medoids)
+  } else {
+    sub_labels <- pam_sub$clustering
+  }
+
+  data |>
+    mutate(subcluster = paste0(macro_id, ".", sub_labels))
+}
+```
+
+```{r subclustering}
+#| message: false
+# Pass k_override as a named list: cluster label (as string) -> forced k
+k_overrides <- list("1" = 4)
+
+subclustered <- indiv_clustered |>
+  group_by(cluster) |>
+  group_modify(~ subcluster_fn(.x, macro_id = .y$cluster,
+                                k_override = k_overrides)) |>
+  ungroup()
+```
+
+## Subcluster summaries
+
+Sizes of all final subclusters:
+
+```{r subcluster-sizes}
+subclustered |>
+  count(cluster, subcluster) |>
+  arrange(cluster, subcluster)
+```
+
+Variable means by subcluster:
+
+```{r subcluster-means}
+subclustered |>
+  group_by(subcluster) |>
+  summarise(
+    n = n(),
+    across(c(n_trips, total_distance, share_long_trips,
+             share_walk, share_cycle, share_car_driver, share_car_pass,
+             share_bus, share_rail, share_other,
+             share_work, share_education, share_escort_educ,
+             share_shopping, share_escort, share_leisure),
+           mean, na.rm = TRUE)
+  ) |>
+  arrange(subcluster)
+```
+
+Modal choice distribution by subcluster:
+
+```{r subcluster-modal}
+#| fig-width: 9
+#| fig-height: 5
+subclustered |>
+  count(subcluster, modal_choice) |>
+  group_by(subcluster) |>
+  mutate(pct = n / sum(n) * 100) |>
+  ggplot(aes(x = modal_choice, y = pct, fill = subcluster)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~ subcluster, scales = "free_y") +
+  labs(x = NULL, y = "% within subcluster") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```

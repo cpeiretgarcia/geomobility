@@ -1,3 +1,26 @@
 proj/data/processed/nts_demo_variables.parquet
 proj/data/UKDA-5340-tab/mrdoc/excel/5340_nts_lookup_table–eul–2002_to_2024.xlsx
 proj/data/UKDA-5340-tab/mrdoc/excel/5340_nts%20_lookup_table_response_levels_eul_2002_to_2024.xlsx
+
+# DS_Store
+.DS_Store
+**/.DS_Store
+
+# LaTeX build artefacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+
+# Rendered PDF (regenerated from .tex)
+proj/docs/paper.pdf
+
+# Rendered HTML output (regenerated from .qmd)
+proj/src/*.html
+proj/src/*_files/
+proj/docs/*.html
+proj/docs/*_files/
